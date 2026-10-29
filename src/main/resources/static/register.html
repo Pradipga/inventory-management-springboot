@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Inventory Management</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e0eaff, #f5f7ff);
+            color: #1f2937;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 35px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            text-align: center;
+            font-size: 26px;
+        }
+
+        .subtitle {
+            margin: 10px 0 25px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 2px solid #93c5fd;
+            border-color: #2563eb;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 24px;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .login-link {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+<div class="register-card">
+    <div class="logo">📦</div>
+    <h1>Create Account</h1>
+    <p class="subtitle">Register to access your Inventory Management account.</p>
+
+    <form id="registerForm">
+        <label for="username">Username</label>
+        <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Choose a username"
+                autocomplete="username"
+                minlength="3"
+                maxlength="50"
+                required
+        >
+
+        <label for="password">Password</label>
+        <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="At least 8 characters"
+                autocomplete="new-password"
+                minlength="8"
+                required
+        >
+
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Enter your password again"
+                autocomplete="new-password"
+                minlength="8"
+                required
+        >
+
+        <button type="submit" id="registerButton">Create Account</button>
+        <p id="message" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="login-link">
+        Already have an account?
+        <a href="/login.html">Log in</a>
+    </div>
+</div>
+
+<script>
+    const registerForm = document.getElementById("registerForm");
+    const registerButton = document.getElementById("registerButton");
+    const message = document.getElementById("message");
+
+    registerForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (username.length < 3) {
+            message.style.color = "#dc2626";
+            message.textContent = "Username must contain at least 3 characters.";
+            return;
+        }
+
+        if (password.length < 8) {
+            message.style.color = "#dc2626";
+            message.textContent = "Password must contain at least 8 characters.";
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            message.style.color = "#dc2626";
+            message.textContent = "Passwords do not match.";
+            return;
+        }
+
+        registerButton.disabled = true;
+        message.style.color = "#6b7280";
+        message.textContent = "Creating your account...";
+
+        try {
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "same-origin",
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Unable to create account.");
+            }
+
+            message.style.color = "#15803d";
+            message.textContent = "Account created successfully! Redirecting to login...";
+
+            registerForm.reset();
+
+            setTimeout(function () {
+                window.location.href = "/login.html";
+            }, 1200);
+
+        } catch (error) {
+            message.style.color = "#dc2626";
+            message.textContent = error.message || "Unable to connect. Please try again.";
+        } finally {
+            registerButton.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
