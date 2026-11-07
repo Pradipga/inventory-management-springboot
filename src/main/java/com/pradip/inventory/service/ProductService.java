@@ -1,5 +1,5 @@
 package com.pradip.inventory.service;
-
+import java.io.IOException;
 import com.pradip.inventory.entity.Product;
 import com.pradip.inventory.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -11,9 +11,10 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-
-    public ProductService(ProductRepository productRepository) {
+    private final ImageService imageService;
+    public ProductService(ProductRepository productRepository, ImageService imageService) {
         this.productRepository = productRepository;
+        this.imageService = imageService;
     }
 
     public List<Product> getAllProducts() {
@@ -34,6 +35,12 @@ public class ProductService {
     public void deleteProduct(Long id) {
 
         Product existingProduct = getProductById(id);
+
+        try {
+            imageService.deleteImage(existingProduct.getImageName());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete product image.", e);
+        }
 
         productRepository.delete(existingProduct);
     }

@@ -71,4 +71,18 @@ public class ImageService {
 
         return fileName;
     }
+    public void deleteImage(String fileName) throws IOException {
+
+        if (fileName == null || fileName.isBlank()) {
+            return;
+        }
+
+        Path imagePath = uploadDirectory.resolve(fileName).normalize();
+
+        if (!imagePath.getParent().equals(uploadDirectory)) {
+            throw new IllegalArgumentException("Invalid image filename.");
+        }
+
+        Files.deleteIfExists(imagePath);
+    }
 }
