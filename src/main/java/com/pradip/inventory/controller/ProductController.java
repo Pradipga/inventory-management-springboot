@@ -61,16 +61,22 @@ public class ProductController {
 
         Product product = productService.getProductById(id);
 
-        if (product == null) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Product not found with id: " + id
-            );
+        // Store the old image filename
+        String oldImageName = product.getImageName();
+
+        // Upload the new image
+        String newImageName = imageService.saveImage(image);
+
+        // Update the product with the new image
+        product.setImageName(newImageName);
+
+        Product updatedProduct = productService.saveProduct(product);
+
+        // Delete the old image after successful database update
+        if (oldImageName != null && !oldImageName.isBlank()) {
+            imageService.deleteImage(oldImageName);
         }
 
-        String imageName = imageService.saveImage(image);
-        product.setImageName(imageName);
-
-        return productService.saveProduct(product);
+        return updatedProduct;
     }
 }
